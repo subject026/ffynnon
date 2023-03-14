@@ -2,62 +2,106 @@ import MainLayout from "../components/MainLayout/MainLayout";
 import ButtonLink from "../packages/shared/components/ButtonLink/ButtonLink";
 import { classNames, pagewrap } from "../utils";
 
-import type { loader as rootLoader } from "../root";
-import { useLoaderData, useRouteLoaderData } from "@remix-run/react";
-import { DataFunctionArgs, json, SerializeFrom } from "@remix-run/node";
-import { createServerClient } from "../utils/supabase.server";
-import { User } from "@supabase/auth-helpers-remix";
+import { Link, useLoaderData, useOutletContext } from "@remix-run/react";
+import { json } from "@remix-run/node";
+import type { DataFunctionArgs } from "@remix-run/node";
+
+import { db } from "../utils/db.server";
+import type { TUserPayload } from "../controllers/UserController";
 
 export async function loader({ request }: DataFunctionArgs) {
-  const response = new Response();
-  const supabase = createServerClient({ request, response });
+  let organisations = await db.organisation.findMany();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session) {
-    return json({
-      session: null,
-    });
-  }
-
-  // const organisations =
-  return json(
-    {
-      session,
-      // organisations,
-    },
-    {
-      headers: response.headers,
-    }
-  );
+  return json({
+    organisations,
+  });
 }
 
 export default function Index() {
-  const { session } = useLoaderData<typeof loader>();
+  const { organisations } = useLoaderData<typeof loader>();
 
-  const user = session?.user;
+  const { user } = useOutletContext<{ user: TUserPayload | null }>();
 
   return (
-    <MainLayout user={user as User}>
+    <MainLayout user={user}>
       <div
         className={classNames(
           pagewrap,
           "flex flex-col items-center justify-center prose"
         )}
       >
-        {user ? <LoggedIn user={user as User} /> : <NotLoggedIn />}
+        {user ? (
+          <LoggedIn
+            user={{
+              email: user.email,
+              memberships: user.memberships.map((membership) => ({
+                id: membership.id,
+                organisation: {
+                  id: membership.organisation.id,
+                  name: membership.organisation.name,
+                  slug: membership.organisation.slug,
+                  profileImg: membership.organisation.profileImg,
+                },
+              })),
+            }}
+          />
+        ) : (
+          <>
+            <NotLoggedIn />
+            {organisations.length ? (
+              <div>
+                {organisations.map((organisation) => (
+                  <div key={`${organisation.id}`}>{organisation.name}</div>
+                ))}
+              </div>
+            ) : (
+              <div>no orgs found!</div>
+            )}
+          </>
+        )}
       </div>
     </MainLayout>
   );
 }
 
-function LoggedIn({ user }: { user: User }) {
+function LoggedIn({
+  user,
+}: {
+  user: {
+    email: string;
+    memberships: {
+      id: string;
+      organisation: {
+        id: string;
+        name: string;
+        slug: string | null;
+        profileImg: string | null;
+      };
+    }[];
+  };
+}) {
   return (
     <>
       <p>logged in!</p>
-      <p>{user.email}</p>
+
+      {user &&
+        user.memberships.length &&
+        user.memberships.map(({ organisation }) => {
+          return (
+            <p key={organisation.id}>
+              <Link
+                to={`/${
+                  organisation.slug ? organisation.slug : organisation.id
+                }`}
+              >
+                {organisation.profileImg && (
+                  <img src={organisation.profileImg} alt="" />
+                )}
+                {organisation.name}
+              </Link>
+            </p>
+          );
+        })}
     </>
   );
 }

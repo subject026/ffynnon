@@ -1,0 +1,14 @@
+# Use postgres/example user/password credentials
+version: "3.1"
+
+services:
+  db:
+    container_name: ffynnon-dev-db
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ffynnon-dev
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - 5432:5432

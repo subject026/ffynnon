@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+
+  role        GlobalRole   @default(User)
+  memberships Membership[]
+  session     Session?
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  expiresAt DateTime?
+
+  userEmail String @unique
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id])
+
+  membershipId String      @unique
+  membership   Membership? @relation(fields: [membershipId], references: [id])
+
+  organisation   Organisation? @relation(fields: [organisationId], references: [id])
+  organisationId String?
+}
+
+model Organisation {
+  id          String         @id @default(cuid())
+  slug        String?        @unique
+  name        String         @unique
+  profileImg  String?
+  headerImg   String?
+  description String?
+  memberships Membership[]
+  links       Link[]
+  linkCateory LinkCategory[]
+  Session     Session[]
+}
+
+model Link {
+  id              String  @id @default(cuid())
+  url             String
+  title           String
+  description     String?
+  thumbnailUrl    String?
+  thumbnailWidth  String?
+  thumbnailHeight String?
+  iconUrl         String?
+
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisationId String
+
+  categories LinkCategory[]
+}
+
+model LinkCategory {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisationId String
+
+  link Link[]
+}
+
+model Membership {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  organisation   Organisation @relation(fields: [organisationId], references: [id])
+  organisationId String       @unique
+
+  session Session?
+
+  role MembershipRole
+}
+
+enum GlobalRole {
+  SUDODOOGLE
+  User
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+}

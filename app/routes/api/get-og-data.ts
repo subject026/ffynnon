@@ -18,6 +18,8 @@ import { z } from "zod";
 //   }),
 // });
 
+// NOTE OG data shouldn't be required
+
 const LinkOgData = z.object({
   requestUrl: z.string(),
   ogTitle: z.string(),

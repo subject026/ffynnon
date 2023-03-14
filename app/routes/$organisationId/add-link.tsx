@@ -26,10 +26,16 @@ export async function action({ request }: ActionArgs) {
   const url = formdata.get("url");
   const title = formdata.get("title");
   const description = formdata.get("description");
-  const thumbnailUrl = formdata.get("thumbnailUrl");
-  const thumbnailWidth = formdata.get("thumbnailWidth");
-  const thumbnailHeight = formdata.get("thumbnailheight");
-  const iconUrl = formdata.get("iconUrl");
+  // const thumbnailUrl = formdata.get("thumbnailUrl");
+  // const thumbnailWidth = formdata.get("thumbnailWidth");
+  // const thumbnailHeight = formdata.get("thumbnailheight");
+  // const iconUrl = formdata.get("iconUrl");
+
+  console.log({
+    title,
+    url,
+    description,
+  });
 
   if (
     typeof title !== "string" ||
@@ -52,16 +58,16 @@ export async function action({ request }: ActionArgs) {
     iconUrl?: string;
   };
 
-  if (thumbnailUrl && typeof thumbnailUrl === "string")
-    optionalArgs.thumbnailUrl = thumbnailUrl;
-  if (thumbnailWidth && typeof thumbnailWidth === "string")
-    optionalArgs.thumbnailWidth = thumbnailWidth;
-  if (thumbnailHeight && typeof thumbnailHeight === "string")
-    optionalArgs.thumbnailHeight = thumbnailHeight;
-  if (iconUrl && typeof iconUrl === "string") optionalArgs.iconUrl = iconUrl;
-  if (typeof thumbnailUrl !== "string" || typeof url !== "string") {
-    return badRequest({ message: "form submitted incorrectly" });
-  }
+  // if (thumbnailUrl && typeof thumbnailUrl === "string")
+  //   optionalArgs.thumbnailUrl = thumbnailUrl;
+  // if (thumbnailWidth && typeof thumbnailWidth === "string")
+  //   optionalArgs.thumbnailWidth = thumbnailWidth;
+  // if (thumbnailHeight && typeof thumbnailHeight === "string")
+  //   optionalArgs.thumbnailHeight = thumbnailHeight;
+  // if (iconUrl && typeof iconUrl === "string") optionalArgs.iconUrl = iconUrl;
+  // if (typeof thumbnailUrl !== "string" || typeof url !== "string") {
+  //   return badRequest({ message: "form submitted incorrectly" });
+  // }
 
   await createLink({ ...args, ...optionalArgs });
 

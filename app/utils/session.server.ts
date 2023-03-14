@@ -44,7 +44,7 @@ export async function requireUserId(request: Request) {
 
 export async function logout(request: Request) {
   const session = await getUserSession(request);
-  return redirect("/", {
+  return redirect("/login", {
     headers: {
       "Set-Cookie": await destroySession(session),
     },

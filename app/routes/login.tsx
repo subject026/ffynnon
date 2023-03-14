@@ -17,7 +17,7 @@ import {
   FormTitle,
   Input,
 } from "../packages/shared/components/Form";
-import { config } from "../config";
+// import { config } from "../config";
 import { badRequest } from "../utils/request.server";
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
